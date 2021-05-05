@@ -19,6 +19,8 @@
   },
   "homepage": "https://github.com/fonglezen/webpack-multi-config-demo#readme",
   "devDependencies": {
+    "clean-webpack-plugin": "^4.0.0-alpha.0",
+    "html-webpack-plugin": "^4.5.2",
     "parallel-webpack": "^2.6.0",
     "webpack": "^4.46.0",
     "webpack-cli": "^4.6.0"

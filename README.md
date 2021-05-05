@@ -38,7 +38,6 @@
 ---- /products
 ------ index.js
 ---- /common
------- apis.js
 ------ utils.js
 ```
 这样demo的目录结构创建完成。
@@ -142,3 +141,137 @@ npm run build:parallel
 [WEBPACK] Finished build after 0.03 seconds
 
 ```
+
+## 3、demo 应用代码准备
+
+接下来准备简单的demo功能，该应用为页面有两个按钮，一个User按钮，一个Product按钮，点击按钮之后加载对应的资源，分别显示用户列表和产品列表。
+
+### （1）创建html页面
+
+在根目录创建`public`目录，并在该目录下创建`index.html`文件，demo入口模块将把按钮元素添加到`#app`元素中。
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>webpack-multi-config-demo</title>
+</head>
+<body>
+  <div id="app"></div>
+</body>
+</html>
+```
+
+然后添加`html-webpack-plugin`插件和`clean-webpack-plugin`插件，通过这两个插件，先清空构建目标目录，然后将资源加载标签添加到html模板中，并复制到构建目标目录。
+
+```bash
+# 注意版本
+npm i --save-dev html-webpack-plugin@4 clean-webpack-plugin
+```
+
+在`webpack.config.js`中添加插件配置。
+
+```js
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+
+module.exports = {
+  mode: 'production',
+  plugins: [
+    new CleanWebpackPlugin(),
+    new HtmlWebpackPlugin({
+      template: 'public/index.html',
+    }),
+  ]
+}
+```
+
+### (2) 编写应用逻辑
+
+`./src/index.js` :
+```js
+import * as user from './apps/users';
+import * as product from './apps/products';
+
+// 创建列表容器
+const listContainer = document.createElement('ul');
+listContainer.id = 'listContainer';
+
+// 创建2个按钮
+const buttonElements = [
+  user.getButtonElement(listContainer),
+  product.getButtonElement(listContainer),
+];
+
+// 添加按钮到 #app 中
+buttonElements.forEach(element => document.querySelector('#app').appendChild(element));
+
+// 添加listContainer到 #app 中
+document.querySelector('#app').appendChild(listContainer)
+```
+
+`./src/common/utils.js` :
+```js
+export function createButton(innerText, clickListener) {
+  const button = document.createElement('button');
+  button.innerText = innerText;
+  button.addEventListener('click', clickListener);
+  return button;
+}
+```
+
+`./src/apps/products/index.js` :
+```js
+import list from './list';
+import { createButton } from '../../common/utils';
+
+export function getButtonElement(listTargetElement) {
+  return createButton('Product', () => {
+    // 显示 list内容
+    listTargetElement.innerHTML = list.map(item => `<li>${item}</li>`).join('');
+  });
+}
+```
+
+`./src/apps/products/list.js` :
+```js
+export default [
+  'product list item 1',
+  'product list item 2',
+  'product list item 3',
+  'product list item 4',
+  'product list item 5',
+];
+```
+
+`./src/apps/users/index.js` :
+```js
+import list from './list';
+import { createButton } from '../../common/utils';
+
+export function getButtonElement(listTargetElement) {
+  return createButton('User', () => {
+    // 显示 list内容
+    listTargetElement.innerHTML = list.map(item => `<li>${item}</li>`).join('');
+  });
+}
+```
+
+`./src/apps/users/list.js` :
+```js
+export default [
+  'user list item 1',
+  'user list item 2',
+  'user list item 3',
+  'user list item 4',
+];
+```
+
+执行`npm run build`命令之后，构建成功，通过`http-server dist`开启本地web服务后能够正常访问，点击按钮可以正确显示对应的列表数据，demo准备完成。
+
+
+## 4、拆分配置 - 主入口模块忽略apps目录模块构建
+
+研究了一番webpack官方配置文档之后，我发现使用`externals`配置是最容易实现的方式之一。
