@@ -1,0 +1,26 @@
+{
+  "name": "webpack-multi-config-demo",
+  "version": "1.0.0",
+  "description": "当我们的应用达到某种程度的庞大时，我们可能需要考虑如何提高应用的生产构建速度，将大应用拆分为小应用的集合往往是比较好的办法，比如架构调整，将项目拆分为微前端架构，又或者将单个代码库拆分多个代码库等。",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "build:parallel": "node parallel-webpack.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fonglezen/webpack-multi-config-demo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fonglezen/webpack-multi-config-demo/issues"
+  },
+  "homepage": "https://github.com/fonglezen/webpack-multi-config-demo#readme",
+  "devDependencies": {
+    "parallel-webpack": "^2.6.0",
+    "webpack": "^4.46.0",
+    "webpack-cli": "^4.6.0"
+  }
+}
